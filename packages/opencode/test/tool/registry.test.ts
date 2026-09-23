@@ -118,6 +118,16 @@ describe("tool.registry", () => {
     }),
   )
 
+  it.instance("exposes repository_overview as a built-in tool", () =>
+    Effect.gen(function* () {
+      const registry = yield* ToolRegistry.Service
+      const overview = (yield* registry.all()).find((tool) => tool.id === "repository_overview")
+
+      expect(overview).toBeDefined()
+      expect(overview?.description).toContain("Inspect the current repository")
+    }),
+  )
+
   withCodeMode.instance("exposes execute when code mode is enabled", () =>
     Effect.gen(function* () {
       const registry = yield* ToolRegistry.Service
