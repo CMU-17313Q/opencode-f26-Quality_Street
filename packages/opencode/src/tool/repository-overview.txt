@@ -1,0 +1,4 @@
+- Inspect the current repository and summarize its high-level structure
+- Identifies major directories, important configuration/build/test files, and likely entry points
+- Excludes common generated and dependency directories from the overview
+- Use this when a user asks for a concise starting point for an unfamiliar codebase
