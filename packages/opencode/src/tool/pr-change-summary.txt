@@ -1,0 +1,4 @@
+- Summarize the changes on the current branch compared to the base branch
+- Reports which files and areas changed, and how many lines were added or removed
+- Highlights the largest changes so a reviewer can see the scope quickly
+- Use this when a user wants to understand what a pull request or branch changed
