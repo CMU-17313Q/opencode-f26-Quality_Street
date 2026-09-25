@@ -8,6 +8,7 @@ import { ShellTool } from "./shell"
 import { EditTool } from "./edit"
 import { GlobTool } from "./glob"
 import { RepositoryOverviewTool } from "./repository-overview"
+import { ChangeImpactTool } from "./change-impact"
 import { GrepTool } from "./grep"
 import { ReadTool } from "./read"
 import { TaskTool } from "./task"
@@ -106,6 +107,7 @@ const layer = Layer.effect(
     const shell = yield* ShellTool
     const globtool = yield* GlobTool
     const repositoryOverview = yield* RepositoryOverviewTool
+    const changeImpact = yield* ChangeImpactTool
     const writetool = yield* WriteTool
     const edit = yield* EditTool
     const greptool = yield* GrepTool
@@ -209,6 +211,7 @@ const layer = Layer.effect(
           read: Tool.init(read),
           glob: Tool.init(globtool),
           repositoryOverview: Tool.init(repositoryOverview),
+          changeImpact: Tool.init(changeImpact),
           grep: Tool.init(greptool),
           edit: Tool.init(edit),
           write: Tool.init(writetool),
@@ -233,6 +236,7 @@ const layer = Layer.effect(
             tool.read,
             tool.glob,
             tool.repositoryOverview,
+            tool.changeImpact,
             tool.grep,
             tool.edit,
             tool.write,
