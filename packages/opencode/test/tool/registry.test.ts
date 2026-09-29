@@ -128,6 +128,16 @@ describe("tool.registry", () => {
     }),
   )
 
+  it.instance("exposes change_impact as a built-in tool", () =>
+    Effect.gen(function* () {
+      const registry = yield* ToolRegistry.Service
+      const impact = (yield* registry.all()).find((tool) => tool.id === "change_impact")
+
+      expect(impact).toBeDefined()
+      expect(impact?.description).toContain("Analyze how changing a file may affect")
+    }),
+  )
+
   withCodeMode.instance("exposes execute when code mode is enabled", () =>
     Effect.gen(function* () {
       const registry = yield* ToolRegistry.Service
