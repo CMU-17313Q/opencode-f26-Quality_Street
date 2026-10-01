@@ -243,7 +243,7 @@ const layer = Layer.effect(
             tool.read,
             tool.glob,
             tool.repositoryOverview,
-x            tool.learningReview,
+            tool.learningReview,
             tool.changeImpact,
             tool.prChangeSummary,
             tool.grep,
