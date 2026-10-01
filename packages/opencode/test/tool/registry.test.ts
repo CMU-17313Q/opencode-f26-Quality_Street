@@ -128,6 +128,15 @@ describe("tool.registry", () => {
     }),
   )
 
+  it.instance("exposes learning_review as a built-in tool", () =>
+    Effect.gen(function* () {
+      const registry = yield* ToolRegistry.Service
+      const review = (yield* registry.all()).find((tool) => tool.id === "learning_review")
+
+      expect(review).toBeDefined()
+      expect(review?.description).toContain("learning-oriented")
+              }),
+            )
   it.instance("exposes change_impact as a built-in tool", () =>
     Effect.gen(function* () {
       const registry = yield* ToolRegistry.Service

@@ -1,0 +1,5 @@
+- Review student-written code or recent changes and explain weaknesses in a learning-oriented way
+- Pass `paths` to review whole files, or `diff` (e.g. output of `git diff`) to review only added lines
+- Groups findings into correctness, maintainability, and clarity, each with why it matters and a hint to improve
+- Gives guidance and questions instead of rewriting the student's solution; do not replace their code unless asked
+- Use this when a user asks for feedback on their own code or wants to learn how to improve it
