@@ -135,6 +135,8 @@ describe("tool.registry", () => {
 
       expect(review).toBeDefined()
       expect(review?.description).toContain("learning-oriented")
+              }),
+            )
   it.instance("exposes change_impact as a built-in tool", () =>
     Effect.gen(function* () {
       const registry = yield* ToolRegistry.Service
