@@ -1,0 +1,5 @@
+- Analyze how changing a file may affect the rest of the repository
+- Finds files that directly import, re-export, or reference the changed file (JavaScript/TypeScript and Python)
+- Explains why each affected file may be impacted, including which exported symbols it relies on and which tests cover it
+- Focuses on direct impacts only; it does not trace indirect or transitive effects
+- Use this when a user asks what could break, or what else to check, before or after modifying a file

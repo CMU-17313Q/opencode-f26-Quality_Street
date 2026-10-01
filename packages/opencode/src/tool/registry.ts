@@ -9,6 +9,8 @@ import { EditTool } from "./edit"
 import { GlobTool } from "./glob"
 import { RepositoryOverviewTool } from "./repository-overview"
 import { LearningReviewTool } from "./learning-review"
+import { ChangeImpactTool } from "./change-impact"
+import { PrChangeSummaryTool } from "./pr-change-summary"
 import { GrepTool } from "./grep"
 import { ReadTool } from "./read"
 import { TaskTool } from "./task"
@@ -56,6 +58,7 @@ import { ModelV2 } from "@opencode-ai/core/model"
 import { MCP } from "@/mcp"
 import { PermissionV1 } from "@opencode-ai/core/v1/permission"
 import { McpCatalog } from "@/mcp/catalog"
+import { Git } from "@/git"
 
 export function webSearchEnabled(providerID: ProviderV2.ID, flags = { exa: false, parallel: false }) {
   return providerID === ProviderV2.ID.opencode || flags.exa || flags.parallel
@@ -108,6 +111,8 @@ const layer = Layer.effect(
     const globtool = yield* GlobTool
     const repositoryOverview = yield* RepositoryOverviewTool
     const learningReview = yield* LearningReviewTool
+    const changeImpact = yield* ChangeImpactTool
+    const prChangeSummary = yield* PrChangeSummaryTool
     const writetool = yield* WriteTool
     const edit = yield* EditTool
     const greptool = yield* GrepTool
@@ -212,6 +217,8 @@ const layer = Layer.effect(
           glob: Tool.init(globtool),
           repositoryOverview: Tool.init(repositoryOverview),
           learningReview: Tool.init(learningReview),
+          changeImpact: Tool.init(changeImpact),
+          prChangeSummary: Tool.init(prChangeSummary),
           grep: Tool.init(greptool),
           edit: Tool.init(edit),
           write: Tool.init(writetool),
@@ -236,7 +243,9 @@ const layer = Layer.effect(
             tool.read,
             tool.glob,
             tool.repositoryOverview,
-            tool.learningReview,
+x            tool.learningReview,
+            tool.changeImpact,
+            tool.prChangeSummary,
             tool.grep,
             tool.edit,
             tool.write,
@@ -432,6 +441,7 @@ export const node = LayerNode.make({
   layer,
   deps: [
     Config.node,
+    Git.node,
     Plugin.node,
     Question.node,
     Todo.node,
