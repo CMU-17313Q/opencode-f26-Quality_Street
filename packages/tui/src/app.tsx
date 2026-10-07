@@ -43,6 +43,7 @@ import { DialogModel } from "./component/dialog-model"
 import { useConnected } from "./component/use-connected"
 import { DialogMcp } from "./component/dialog-mcp"
 import { DialogStatus } from "./component/dialog-status"
+import { DialogDesignTradeoff } from "./component/dialog-design-tradeoff"
 import { DialogDebug } from "./component/dialog-debug"
 import { DialogThemeList } from "./component/dialog-theme-list"
 import { DialogHelp } from "./ui/dialog-help"
@@ -768,6 +769,18 @@ function App(props: { onSnapshot?: () => Promise<string[]>; pluginHost: TuiPlugi
           dialog.replace(() => <DialogStatus />)
         },
         category: "System",
+      },
+      {
+        name: "design.tradeoff",
+        title: "Explain design tradeoffs",
+        slashName: "tradeoff",
+        slashAliases: ["tradeoffs"],
+        run: () => {
+          void DialogDesignTradeoff.start(dialog, {
+            directory: project.instance.directory() || sync.path.directory,
+          })
+        },
+        category: "Learning",
       },
       {
         name: "opencode.debug",
