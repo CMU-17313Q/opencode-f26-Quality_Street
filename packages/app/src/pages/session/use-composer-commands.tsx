@@ -1,10 +1,12 @@
 import { useCommand, type CommandOption } from "@/context/command"
 import { useLanguage } from "@/context/language"
 import { useLocal, type ModelSelection } from "@/context/local"
+import { usePrompt } from "@/context/prompt"
 import { useDialog } from "@opencode-ai/ui/context/dialog"
 import { getCursorPosition, setCursorPosition } from "@/components/prompt-input/editor-dom"
 import { useSessionLayout } from "./session-layout"
 import { createSessionOwnership } from "./session-ownership"
+import { repositoryOverviewCommand } from "./repository-overview-command"
 
 const withCategory = (category: string) => {
   return (option: Omit<CommandOption, "category">): CommandOption => ({
@@ -18,6 +20,7 @@ export const useComposerCommands = (input: { model?: ModelSelection } = {}) => {
   const dialog = useDialog()
   const language = useLanguage()
   const local = useLocal()
+  const prompt = usePrompt()
   const { sessionKey } = useSessionLayout()
   const sessionOwnership = createSessionOwnership(sessionKey)
   const model = input.model ?? local.model
@@ -78,6 +81,10 @@ export const useComposerCommands = (input: { model?: ModelSelection } = {}) => {
       keybind: "shift+mod+.",
       disabled: !local.agent.visible(),
       onSelect: () => local.agent.move(-1),
+    }),
+    repositoryOverviewCommand({
+      category: language.t("command.category.session"),
+      setPrompt: (value, cursorPosition) => prompt.set(value, cursorPosition),
     }),
   ])
 }
