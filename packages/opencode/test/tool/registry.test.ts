@@ -128,6 +128,16 @@ describe("tool.registry", () => {
     }),
   )
 
+  it.instance("exposes component_relationship as a built-in tool", () =>
+    Effect.gen(function* () {
+      const registry = yield* ToolRegistry.Service
+      const relationship = (yield* registry.all()).find((tool) => tool.id === "component_relationship")
+
+      expect(relationship).toBeDefined()
+      expect(relationship?.description).toContain("relationships")
+    }),
+  )
+
   it.instance("exposes learning_review as a built-in tool", () =>
     Effect.gen(function* () {
       const registry = yield* ToolRegistry.Service

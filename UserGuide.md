@@ -58,15 +58,21 @@ Together, these tests cover the feature's core analysis behavior, built-in tool 
 ---
 ## Component Relationship Mapper
 
-
 ### How to Use
 
+1. Open a session for the repository you want to inspect.
+2. Choose **Generate Component Relationship Map** from the command palette, or type `/component-relationships` in the composer.
+3. Submit the inserted request. OpenCode invokes `component_relationship` and displays the relationship map in the session timeline.
+
+The map aggregates resolvable TypeScript and JavaScript imports between major components. Each relationship names its source and target components and explains how the source uses the target. Imports within the same component and external packages are excluded to keep the result high level.
 
 ### User Testing
 
+Run the command in a repository containing imports between two top-level components. Confirm the timeline identifies both components, the import or re-export evidence, and a plain-language explanation. Repeat in a repository with only isolated files or same-component imports and confirm the clear no-relationship state appears.
 
 ### Automated Tests
 
+`packages/opencode/test/tool/component-relationship.test.ts` verifies relationship aggregation, import filtering, source and target presentation, explanations, and the no-relationship state. `packages/opencode/test/tool/registry.test.ts` verifies that `component_relationship` is registered. `packages/app/src/pages/session/component-relationship-command.test.ts` verifies that the UI command inserts the correct tool request.
 
 ---
 ## PR Impact Analyzer
