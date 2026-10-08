@@ -11,6 +11,7 @@ import { RepositoryOverviewTool } from "./repository-overview"
 import { LearningReviewTool } from "./learning-review"
 import { ChangeImpactTool } from "./change-impact"
 import { PrChangeSummaryTool } from "./pr-change-summary"
+import { PrImpactTool } from "./pr-impact"
 import { GrepTool } from "./grep"
 import { ReadTool } from "./read"
 import { TaskTool } from "./task"
@@ -113,6 +114,7 @@ const layer = Layer.effect(
     const learningReview = yield* LearningReviewTool
     const changeImpact = yield* ChangeImpactTool
     const prChangeSummary = yield* PrChangeSummaryTool
+    const prImpact = yield* PrImpactTool
     const writetool = yield* WriteTool
     const edit = yield* EditTool
     const greptool = yield* GrepTool
@@ -219,6 +221,7 @@ const layer = Layer.effect(
           learningReview: Tool.init(learningReview),
           changeImpact: Tool.init(changeImpact),
           prChangeSummary: Tool.init(prChangeSummary),
+          prImpact: Tool.init(prImpact),
           grep: Tool.init(greptool),
           edit: Tool.init(edit),
           write: Tool.init(writetool),
@@ -246,6 +249,7 @@ const layer = Layer.effect(
             tool.learningReview,
             tool.changeImpact,
             tool.prChangeSummary,
+            tool.prImpact,
             tool.grep,
             tool.edit,
             tool.write,
