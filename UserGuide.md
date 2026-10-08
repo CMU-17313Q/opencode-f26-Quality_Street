@@ -22,7 +22,7 @@ Together, these tests cover the feature's core analysis behavior, built-in tool 
 ### How to Use
 1. Open a session for the repository you are working in.
 2. Open the command palette and select **Analyze Change Impact**, or type `/change-impact` in the composer.
-3. Type the path of the file you plan to change after the inserted request (for example `src/cart/pricing.ts`) and submit it. OpenCode invokes the built-in `change_impact` tool and displays the result in the session timeline.
+3. Type the path of the file you plan to change after the inserted request (for example `src/cart/pricing.ts`) and submit it. OpenCode invokes the built-in `change_impact` tool. The timeline shows a **Change impact** row with the file path; expand it to see the full report, and the model summarizes it below.
 
 You can also ask in plain language, for example "I'm about to change `src/cart/pricing.ts`. What other files could this affect?", and the model will call `change_impact` itself.
 
