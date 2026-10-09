@@ -74,15 +74,18 @@ Together these cover the reviewer's analysis, its error handling, and the new co
 ---
 ## PR Change Summarizer
 
-
 ### How to Use
+1. Check out the branch you want to summarize, for example a teammate's pull request branch.
+2. Open the command palette and select **Summarize PR Changes**, or type `/pr-change-summary` in the composer.
+3. Submit the inserted request. OpenCode invokes the built-in `pr_change_summary` tool and displays the result in the session timeline.
 
+The result shows how many files changed and their status, total lines added and removed, which areas of the repository were touched, the largest changes, and a full list of changed files. If the branch has no changes against the base branch, it says so explicitly.
 
 ### User Testing
-
+On a branch with a few committed changes, run `/pr-change-summary` and confirm the counts match `git diff --stat` against main, the areas reflect the folders you changed, and the largest file appears first under "Largest changes". Then run it on a branch identical to main and confirm the "No changes were found" message appears.
 
 ### Automated Tests
-
+`packages/opencode/test/tool/pr-change-summary.test.ts` verifies status counting, line totals, grouping by area, ranking the largest changes, files with no line statistics, the empty state, and the formatted output sections. `packages/opencode/test/tool/registry.test.ts` verifies that `pr_change_summary` is registered as a built-in tool. `packages/app/src/pages/session/pr-change-summary-command.test.ts` verifies the `/pr-change-summary` command is registered and inserts the request that invokes the tool.
 
 ---
 ## Component Relationship Mapper

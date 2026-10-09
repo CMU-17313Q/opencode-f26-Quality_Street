@@ -9,6 +9,7 @@ import { createSessionOwnership } from "./session-ownership"
 import { repositoryOverviewCommand } from "./repository-overview-command"
 import { componentRelationshipCommand } from "./component-relationship-command"
 import { changeImpactCommand } from "./change-impact-command"
+import { prChangeSummaryCommand } from "./pr-change-summary-command"
 
 const withCategory = (category: string) => {
   return (option: Omit<CommandOption, "category">): CommandOption => ({
@@ -96,5 +97,9 @@ export const useComposerCommands = (input: { model?: ModelSelection } = {}) => {
       category: language.t("command.category.session"),
       setPrompt: (value, cursorPosition) => prompt.set(value, cursorPosition),
     }),
-   ])
+    prChangeSummaryCommand({
+      category: language.t("command.category.session"),
+      setPrompt: (value, cursorPosition) => prompt.set(value, cursorPosition),
+    }),
+  ])
 }
