@@ -7,6 +7,7 @@ import { getCursorPosition, setCursorPosition } from "@/components/prompt-input/
 import { useSessionLayout } from "./session-layout"
 import { createSessionOwnership } from "./session-ownership"
 import { repositoryOverviewCommand } from "./repository-overview-command"
+import { componentRelationshipCommand } from "./component-relationship-command"
 import { changeImpactCommand } from "./change-impact-command"
 import { prChangeSummaryCommand } from "./pr-change-summary-command"
 
@@ -85,6 +86,10 @@ export const useComposerCommands = (input: { model?: ModelSelection } = {}) => {
       onSelect: () => local.agent.move(-1),
     }),
     repositoryOverviewCommand({
+      category: language.t("command.category.session"),
+      setPrompt: (value, cursorPosition) => prompt.set(value, cursorPosition),
+    }),
+    componentRelationshipCommand({
       category: language.t("command.category.session"),
       setPrompt: (value, cursorPosition) => prompt.set(value, cursorPosition),
     }),
