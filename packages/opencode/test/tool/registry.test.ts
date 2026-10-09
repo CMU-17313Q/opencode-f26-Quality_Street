@@ -128,6 +128,15 @@ describe("tool.registry", () => {
     }),
   )
 
+  it.instance("exposes pr_change_summary as a built-in tool", () =>
+    Effect.gen(function* () {
+      const registry = yield* ToolRegistry.Service
+      const summary = (yield* registry.all()).find((tool) => tool.id === "pr_change_summary")
+      expect(summary).toBeDefined()
+      expect(summary?.description).toContain("Summarize the changes on the current branch")
+    }),
+  )
+
   it.instance("exposes learning_review as a built-in tool", () =>
     Effect.gen(function* () {
       const registry = yield* ToolRegistry.Service
