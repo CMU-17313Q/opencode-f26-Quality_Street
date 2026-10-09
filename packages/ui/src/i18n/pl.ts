@@ -154,6 +154,7 @@ export const dict = {
   "ui.tool.list": "Lista",
   "ui.tool.glob": "Glob",
   "ui.tool.grep": "Grep",
+  "ui.tool.changeImpact": "Change impact",
   "ui.tool.webfetch": "Pobieranie sieciowe",
   "ui.tool.websearch": "Wyszukiwanie w sieci",
   "ui.tool.websearch.provider": "{{provider}} Wyszukiwanie w sieci",

@@ -1,5 +1,14 @@
 import { describe, expect, test } from "bun:test"
+import path from "path"
+import { Effect, Layer } from "effect"
+import { Agent } from "@/agent/agent"
+import { InstanceRef } from "@/effect/instance-ref"
+import { FSUtil } from "@opencode-ai/core/fs-util"
+import { MessageID, SessionID } from "../../src/session/schema"
+import { Tool } from "@/tool/tool"
+import { Truncate } from "@/tool/truncate"
 import {
+  LearningReviewTool,
   formatReview,
   parseUnifiedDiff,
   reviewFile,
@@ -90,11 +99,7 @@ describe("learning review", () => {
   })
 
   test("flags clarity problems", () => {
-    const code = [
-      "const x = compute()",
-      "// oldCompute(x);",
-      `const message = "${"a".repeat(130)}"`,
-    ].join("\n")
+    const code = ["const x = compute()", "// oldCompute(x);", `const message = "${"a".repeat(130)}"`].join("\n")
 
     const findings = reviewFile(toSourceFile("src/clarity.ts", code))
 
@@ -171,7 +176,9 @@ describe("learning review", () => {
   })
 
   test("orders findings by category and severity", () => {
-    const findings = reviewFiles([toSourceFile("src/order.ts", "const y = 1\nvar total = 2\ntry { go() } catch (e) {}")])
+    const findings = reviewFiles([
+      toSourceFile("src/order.ts", "const y = 1\nvar total = 2\ntry { go() } catch (e) {}"),
+    ])
 
     expect(findings.map((finding) => finding.category)).toEqual(["correctness", "maintainability", "clarity"])
   })
@@ -195,5 +202,136 @@ describe("learning review", () => {
 
     expect(output).toContain("Reviewed 2 files and found 0 points")
     expect(output).toContain("No common problems were detected")
+  })
+
+  test("applies language-specific rules only to matching files", () => {
+    expect(rules("src/handler.js", "try:\nexcept:\n    pass")).not.toContain("bare-except")
+    expect(rules("app/models.py", "var total = 0\nif value == None: pass")).not.toContain("var-declaration")
+    expect(rules("app/models.py", "value: any = load()")).not.toContain("explicit-any")
+  })
+
+  test("applies language-independent rules to every file type", () => {
+    expect(rules("app/models.py", "# TODO remove this\nprint(result)")).toEqual(
+      expect.arrayContaining(["todo-comment", "debug-output"]),
+    )
+  })
+
+  test("does not flag loose equality inside string literals", () => {
+    expect(rules("src/message.ts", 'const hint = "use == carefully"')).not.toContain("loose-equality")
+  })
+
+  test("allows conventional short loop variable names", () => {
+    expect(rules("src/loop.ts", "let i = 0\nconst e = error")).not.toContain("single-letter-name")
+  })
+
+  test("ignores a diff that only deletes lines", () => {
+    const diff = ["--- a/src/old.ts", "+++ b/src/old.ts", "@@ -1,2 +1,1 @@", " keep()", "-var removed = 1"].join("\n")
+
+    expect(parseUnifiedDiff(diff)).toEqual([])
+  })
+
+  test("tracks line numbers across multiple hunks and files", () => {
+    const diff = [
+      "--- a/src/a.ts",
+      "+++ b/src/a.ts",
+      "@@ -1,1 +1,2 @@",
+      " first()",
+      "+var one = 1",
+      "@@ -20,1 +21,2 @@",
+      " later()",
+      "+var two = 2",
+      "--- a/src/b.ts",
+      "+++ b/src/b.ts",
+      "@@ -5,0 +5,1 @@",
+      "+var three = 3",
+    ].join("\n")
+
+    expect(parseUnifiedDiff(diff).map((file) => [file.path, file.lines.map((line) => line.number)])).toEqual([
+      ["src/a.ts", [2, 22]],
+      ["src/b.ts", [5]],
+    ])
+  })
+})
+
+describe("learning review tool", () => {
+  const context = {
+    sessionID: SessionID.make("ses_test"),
+    messageID: MessageID.make("msg_test"),
+    callID: "",
+    agent: "build",
+    abort: AbortSignal.any([]),
+    messages: [],
+    metadata: () => Effect.void,
+  }
+
+  async function run(params: { paths?: string[]; diff?: string }, files: Record<string, string> = {}) {
+    const permissions: Array<{ permission: string; patterns: string[] }> = []
+    const layer = Layer.mergeAll(
+      Layer.mock(FSUtil.Service, {
+        readFileStringSafe: (filepath: string) => Effect.succeed(files[filepath]),
+      } as any),
+      Layer.mock(Truncate.Service, {
+        output: (text: string) => Effect.succeed({ content: text, truncated: false as const }),
+      }),
+      Layer.mock(Agent.Service, {
+        get: () => Effect.succeed({ name: "build", permission: [] } as any),
+      }),
+    )
+    const tool = await Effect.runPromise(LearningReviewTool.pipe(Effect.flatMap(Tool.init), Effect.provide(layer)))
+    const exit = await Effect.runPromiseExit(
+      tool
+        .execute(params, {
+          ...context,
+          ask: (request: any) => Effect.sync(() => permissions.push(request)),
+        })
+        .pipe(Effect.provideService(InstanceRef, { directory: "/repo", worktree: "/repo", project: {} as any })),
+    )
+    return { exit, permissions }
+  }
+
+  test("reviews requested files after asking for read permission", async () => {
+    const { exit, permissions } = await run({ paths: ["src/app.ts"] }, { "/repo/src/app.ts": "var count = 0" })
+
+    expect(exit._tag).toBe("Success")
+    if (exit._tag !== "Success") return
+    expect(permissions).toEqual([expect.objectContaining({ permission: "read", patterns: ["src/app.ts"] })])
+    expect(exit.value.title).toBe("src/app.ts")
+    expect(exit.value.output).toContain("var-declaration")
+    expect(exit.value.metadata).toMatchObject({ filesReviewed: 1, findings: 1, skippedPaths: 0 })
+  })
+
+  test("reviews a diff without reading files", async () => {
+    const diff = ["--- a/src/app.ts", "+++ b/src/app.ts", "@@ -1,0 +1,1 @@", "+console.log(debug)"].join("\n")
+    const { exit, permissions } = await run({ diff })
+
+    expect(exit._tag).toBe("Success")
+    if (exit._tag !== "Success") return
+    expect(permissions).toEqual([])
+    expect(exit.value.output).toContain("`src/app.ts:1` — debug-output")
+  })
+
+  test("reviews at most ten files and reports the skipped ones", async () => {
+    const paths = Array.from({ length: 12 }, (_, index) => `src/file${index}.ts`)
+    const files = Object.fromEntries(paths.map((file) => [path.join("/repo", file), "export const ok = true"]))
+    const { exit } = await run({ paths }, files)
+
+    expect(exit._tag).toBe("Success")
+    if (exit._tag !== "Success") return
+    expect(exit.value.title).toBe("10 files")
+    expect(exit.value.metadata).toMatchObject({ filesReviewed: 10, skippedPaths: 2 })
+  })
+
+  test("fails clearly when a requested file does not exist", async () => {
+    const { exit } = await run({ paths: ["src/missing.ts"] })
+
+    expect(exit._tag).toBe("Failure")
+    expect(String(exit._tag === "Failure" ? exit.cause : "")).toContain("File not found")
+  })
+
+  test("fails clearly when nothing is given to review", async () => {
+    const { exit } = await run({})
+
+    expect(exit._tag).toBe("Failure")
+    expect(String(exit._tag === "Failure" ? exit.cause : "")).toContain("Provide `paths`")
   })
 })

@@ -138,6 +138,7 @@ export const dict = {
   "ui.tool.list": "စာရင်း",
   "ui.tool.glob": "Glob",
   "ui.tool.grep": "Grep",
+  "ui.tool.changeImpact": "Change impact",
   "ui.tool.task": "လုပ်ဆောင်စရာ",
   "ui.tool.webfetch": "Webfetch",
   "ui.tool.websearch": "ဝဘ်ရှာဖွေမှု",

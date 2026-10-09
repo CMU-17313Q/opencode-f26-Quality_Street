@@ -137,6 +137,7 @@ export const dict: Record<string, string> = {
   "ui.tool.list": "Nimekiri",
   "ui.tool.glob": "Glob",
   "ui.tool.grep": "Grep",
+  "ui.tool.changeImpact": "Change impact",
   "ui.tool.task": "Ülesanne",
   "ui.tool.webfetch": "Webfetch",
   "ui.tool.websearch": "Veebiotsing",
