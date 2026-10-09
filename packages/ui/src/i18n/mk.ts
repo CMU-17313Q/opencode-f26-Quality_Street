@@ -137,6 +137,7 @@ export const dict = {
   "ui.tool.list": "Список",
   "ui.tool.glob": "Glob",
   "ui.tool.grep": "Grep",
+  "ui.tool.changeImpact": "Change impact",
   "ui.tool.task": "Задача",
   "ui.tool.webfetch": "Webfetch",
   "ui.tool.websearch": "Пребарување на веб",

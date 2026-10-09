@@ -162,6 +162,7 @@ export const dict = {
   "ui.tool.list": "سرد",
   "ui.tool.glob": "Glob",
   "ui.tool.grep": "Grep",
+  "ui.tool.changeImpact": "Change impact",
   "ui.tool.webfetch": "جلب الويب",
   "ui.tool.websearch": "بحث الويب",
   "ui.tool.websearch.provider": "{{provider}} بحث الويب",

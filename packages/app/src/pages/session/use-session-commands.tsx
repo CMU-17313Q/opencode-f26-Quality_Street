@@ -19,6 +19,7 @@ import { extractPromptFromParts } from "@/utils/prompt"
 import { Message, Part, UserMessage } from "@opencode-ai/sdk/v2"
 import { useSessionLayout } from "@/pages/session/session-layout"
 import { createSessionOwnership } from "./session-ownership"
+import { learningReviewCommand } from "./learning-review-command"
 import { useLocal } from "@/context/local"
 
 export type SessionCommandContext = {
@@ -641,5 +642,9 @@ export const useSessionCommands = (actions: SessionCommandContext) => {
     ...messageCmds(),
     ...mcpCmds(),
     ...permissionsCmds(),
+    learningReviewCommand({
+      category: language.t("command.category.session"),
+      setPrompt: (value, cursorPosition) => prompt.set(value, cursorPosition),
+    }),
   ])
 }

@@ -8,6 +8,7 @@ import { ShellTool } from "./shell"
 import { EditTool } from "./edit"
 import { GlobTool } from "./glob"
 import { RepositoryOverviewTool } from "./repository-overview"
+import { ComponentRelationshipTool } from "./component-relationship"
 import { LearningReviewTool } from "./learning-review"
 import { ChangeImpactTool } from "./change-impact"
 import { PrChangeSummaryTool } from "./pr-change-summary"
@@ -111,6 +112,7 @@ const layer = Layer.effect(
     const shell = yield* ShellTool
     const globtool = yield* GlobTool
     const repositoryOverview = yield* RepositoryOverviewTool
+    const componentRelationship = yield* ComponentRelationshipTool
     const learningReview = yield* LearningReviewTool
     const changeImpact = yield* ChangeImpactTool
     const prChangeSummary = yield* PrChangeSummaryTool
@@ -218,6 +220,7 @@ const layer = Layer.effect(
           read: Tool.init(read),
           glob: Tool.init(globtool),
           repositoryOverview: Tool.init(repositoryOverview),
+          componentRelationship: Tool.init(componentRelationship),
           learningReview: Tool.init(learningReview),
           changeImpact: Tool.init(changeImpact),
           prChangeSummary: Tool.init(prChangeSummary),
@@ -246,6 +249,7 @@ const layer = Layer.effect(
             tool.read,
             tool.glob,
             tool.repositoryOverview,
+            tool.componentRelationship,
             tool.learningReview,
             tool.changeImpact,
             tool.prChangeSummary,
