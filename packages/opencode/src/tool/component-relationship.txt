@@ -1,0 +1,3 @@
+- Map meaningful relationships between major TypeScript and JavaScript repository components
+- Groups import and re-export evidence into high-level source-to-target component relationships
+- Use this when a user wants to understand how the main parts of a repository work together
