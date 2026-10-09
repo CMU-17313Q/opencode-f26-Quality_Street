@@ -1,0 +1,4 @@
+- Analyze how the changes on the current branch may affect the rest of the repository
+- Lists the files changed in the PR separately from other files that import, re-export, or reference them
+- Explains why each affected file may be impacted and which changed files cause it
+- Use this when a user wants to understand the broader consequences of a pull request before reviewing or merging it

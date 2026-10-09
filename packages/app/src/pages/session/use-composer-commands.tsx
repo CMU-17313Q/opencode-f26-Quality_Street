@@ -10,7 +10,7 @@ import { repositoryOverviewCommand } from "./repository-overview-command"
 import { componentRelationshipCommand } from "./component-relationship-command"
 import { changeImpactCommand } from "./change-impact-command"
 import { prChangeSummaryCommand } from "./pr-change-summary-command"
-
+import { prImpactCommand } from "./pr-impact-command"
 const withCategory = (category: string) => {
   return (option: Omit<CommandOption, "category">): CommandOption => ({
     ...option,
@@ -98,6 +98,10 @@ export const useComposerCommands = (input: { model?: ModelSelection } = {}) => {
       setPrompt: (value, cursorPosition) => prompt.set(value, cursorPosition),
     }),
     prChangeSummaryCommand({
+      category: language.t("command.category.session"),
+      setPrompt: (value, cursorPosition) => prompt.set(value, cursorPosition),
+    }),
+    prImpactCommand({
       category: language.t("command.category.session"),
       setPrompt: (value, cursorPosition) => prompt.set(value, cursorPosition),
     }),
