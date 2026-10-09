@@ -71,16 +71,18 @@ Together, these tests cover the feature's core analysis behavior, built-in tool 
 ---
 ## PR Impact Analyzer
 
-
 ### How to Use
+1. Check out the branch whose changes you want to analyze, for example a teammate's pull request branch.
+2. Open the command palette and select **Analyze PR Impact**, or type `/pr-impact` in the composer.
+3. Submit the inserted request. OpenCode invokes the built-in `pr_impact` tool and displays the result in the session timeline.
 
+The result has three sections: the files changed in this PR, additional areas that may be affected, and tests to re-run. Each affected file lists which changed files cause the impact and why. Files already changed by the PR are excluded from the additional areas, so the output only shows impact beyond the PR itself. If nothing outside the PR is affected, the result says so explicitly.
 
 ### User Testing
-
+On a branch that changes a module imported elsewhere, run `/pr-impact` and confirm the importing files appear under "Additional areas that may be affected" with a reason, while the changed module appears only under "Changed in this PR". Then run it on a branch whose changes are not imported anywhere and confirm the "No additional files outside this PR appear to be affected" message appears.
 
 ### Automated Tests
-
-
+`packages/opencode/test/tool/pr-impact.test.ts` verifies the impact aggregation: excluding files already changed in the PR, merging a file affected by several changed files, ranking files affected by more changes first, separating tests from other affected files, including re-exports and references, the no-impact state, and the structured output sections. `packages/app/src/pages/session/pr-impact-command.test.ts` verifies that the `/pr-impact` command is registered and inserts the request that invokes the tool. The per-file analysis reuses `analyzeChangeImpact` from the Cross-file Change Impact Analyzer, which has its own tests. The tool's git and filesystem wiring was verified by running `/pr-impact` in a live session.
 ---
 ## Test Failure Explainer
 
