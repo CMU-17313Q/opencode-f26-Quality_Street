@@ -497,6 +497,12 @@ export function getToolInfo(
         title: i18n.t("ui.tool.grep"),
         subtitle: input.pattern,
       }
+    case "change_impact":
+      return {
+        icon: "file-tree",
+        title: i18n.t("ui.tool.changeImpact"),
+        subtitle: input.filePath,
+      }
     case "webfetch":
       return {
         icon: "window-cursor",
@@ -1851,6 +1857,35 @@ ToolRegistry.register({
           title: i18n.t("ui.tool.glob"),
           subtitle: getDirectory(props.input.path || "/"),
           args: props.input.pattern ? ["pattern=" + props.input.pattern] : [],
+        }}
+      >
+        <Show when={props.output}>
+          <div
+            data-component="tool-output"
+            data-scrollable
+            tabIndex={0}
+            role="region"
+            aria-label={i18n.t("ui.scrollView.ariaLabel")}
+          >
+            <Markdown text={props.output!} />
+          </div>
+        </Show>
+      </BasicTool>
+    )
+  },
+})
+
+ToolRegistry.register({
+  name: "change_impact",
+  render(props) {
+    const i18n = useI18n()
+    return (
+      <BasicTool
+        {...props}
+        icon="file-tree"
+        trigger={{
+          title: i18n.t("ui.tool.changeImpact"),
+          subtitle: props.input.filePath,
         }}
       >
         <Show when={props.output}>

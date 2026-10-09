@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test"
 import path from "path"
-import { Effect } from "effect"
+import { Cause, Effect, Exit } from "effect"
 import { LayerNode } from "@opencode-ai/core/effect/layer-node"
 import { CrossSpawnSpawner } from "@opencode-ai/core/cross-spawn-spawner"
 import { FSUtil } from "@opencode-ai/core/fs-util"
@@ -234,6 +234,33 @@ describe("change impact", () => {
       expect(result.output).toContain("`subtract` is no longer exported by the changed file")
       expect(result.output).not.toContain("unrelated")
       expect(result.metadata.affectedFiles).toBe(3)
+    }),
+  )
+
+  it.instance("refuses files outside the current project before searching", () =>
+    Effect.gen(function* () {
+      const test = yield* TestInstance
+      const info = yield* ChangeImpactTool
+      const tool = yield* info.init()
+      const permissions: unknown[] = []
+      const exit = yield* tool
+        .execute(
+          { filePath: path.join(test.directory, "..", "elsewhere.ts") },
+          {
+            sessionID: SessionID.make("ses_test"),
+            messageID: MessageID.make("msg_test"),
+            callID: "",
+            agent: "build",
+            abort: AbortSignal.any([]),
+            messages: [],
+            metadata: () => Effect.void,
+            ask: (request) => Effect.sync(() => permissions.push(request)),
+          },
+        )
+        .pipe(Effect.exit)
+
+      expect(Exit.isFailure(exit) ? String(Cause.squash(exit.cause)) : "").toContain("is outside the current project")
+      expect(permissions).toEqual([])
     }),
   )
 })
