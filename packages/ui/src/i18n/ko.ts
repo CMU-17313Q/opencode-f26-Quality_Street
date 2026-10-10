@@ -123,6 +123,7 @@ export const dict = {
   "ui.tool.glob": "Glob",
   "ui.tool.grep": "Grep",
   "ui.tool.changeImpact": "Change impact",
+  "ui.tool.testFailure": "Test failure",
   "ui.tool.webfetch": "웹 가져오기",
   "ui.tool.websearch": "웹 검색",
   "ui.tool.websearch.provider": "{{provider}} 웹 검색",

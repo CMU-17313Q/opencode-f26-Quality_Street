@@ -151,6 +151,7 @@ export const dict = {
   "ui.tool.glob": "Glob",
   "ui.tool.grep": "Grep",
   "ui.tool.changeImpact": "Change impact",
+  "ui.tool.testFailure": "Test failure",
   "ui.tool.webfetch": "Webfetch",
   "ui.tool.websearch": "Búsqueda web",
   "ui.tool.websearch.provider": "{{provider}} Búsqueda web",
