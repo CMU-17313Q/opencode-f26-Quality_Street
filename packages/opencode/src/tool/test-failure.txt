@@ -1,0 +1,5 @@
+- Explain why tests failed, using the output of a test run (Bun, Jest, Vitest, or pytest)
+- Identifies each failing test, its location, the error, and the expected and received values when present
+- Explains what the failure means in plain language and points to the implementation files and functions worth investigating
+- Gives questions and hints instead of a fix, so the student works out the solution
+- Pass the full test output; if the user has not provided it, run their test command first and pass its output
