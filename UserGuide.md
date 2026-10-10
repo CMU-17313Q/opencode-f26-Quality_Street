@@ -124,15 +124,35 @@ On a branch that changes a module imported elsewhere, run `/pr-impact` and confi
 ---
 ## Test Failure Explainer
 
-
 ### How to Use
+1. Run your tests and copy the full output, including the failure details, not only the summary line.
+2. Open the command palette and select **Explain Test Failure**, or type `/explain-test-failure` in the composer.
+3. Paste the test output after the inserted request and submit it. OpenCode invokes the built-in `test_failure` tool. The timeline shows a **Test failure** row; expand it to see the full explanation, and the model summarizes it below.
 
+You can also ask in plain language, for example "Why is my `adds numbers` test failing?". If you have not pasted the output, the model runs your test command first and passes its output to the tool.
+
+Bun, Jest, Vitest, and pytest output are supported. For each failing test the explanation shows:
+- **Test** and **Error**: the test name, the file and line of the failing test, and the error message.
+- **Expected** and **Received**: shown for assertion failures when the output includes them.
+- **What this means**: the failure in plain language (assertion failed, type error, undefined name, module not found, timeout, snapshot mismatch, or an error thrown by the code).
+- **Where to look**: the implementation files and functions from the stack trace, plus the files the test imports, which are likely the code under test.
+- **Questions to investigate**: hints that help you find the cause yourself. The tool never rewrites your code.
+
+If no failing test can be found in the output, it says so and lists the supported formats instead of showing empty sections. If no implementation file can be identified, it tells you to start from the failing test.
 
 ### User Testing
-
+1. In a project with `src/math.ts` exporting an `add` function that returns the wrong result and a test in `test/math.test.ts` that imports it and expects `add(2, 2)` to be `4`, run `bun test` and copy the output.
+2. Run **Explain Test Failure** (or `/explain-test-failure`), paste the output, and submit.
+3. Confirm that the test name and `test/math.test.ts` with its line number are shown, the error is "Assertion failed" with Expected `4` and the received value, and `src/math.ts` is listed under "Where to look" as imported by the test.
+4. Change `add` so it reads a property of `undefined`, run the tests again, and confirm the error is reported as a type error and `src/math.ts` with its line number appears as where the error was raised.
+5. Paste output from a passing run and confirm the "No failing tests could be identified in this output" message.
 
 ### Automated Tests
+- `packages/opencode/test/tool/test-failure.test.ts` validates the parser and explanations against representative output from each supported runner: a Bun assertion with expected and received values, a Jest type error with its stack trace, a Vitest assertion whose values are only in the message, and a pytest error raised inside the implementation. It also covers timeouts, missing modules, and pytest assertions; stripping terminal colors and ignoring passing tests and `node_modules` frames; the explanation, "Where to look", and hints; the message when no implementation file is found; the no-failure state; and the files a test may import. An end-to-end test runs the real tool on a temporary project, checks the read permission request, and checks that the imported implementation file is reported.
+- `packages/opencode/test/tool/registry.test.ts` verifies that `test_failure` is registered as a built-in tool.
+- `packages/app/src/pages/session/test-failure-command.test.ts` verifies that the UI command is registered with the `/explain-test-failure` slash alias and inserts the request that invokes the tool, with the cursor ready for the pasted output.
 
+Together, these tests map to each acceptance criterion of #19: analyzing common test output, identifying the failed test and its key information, explaining it in plain language, identifying relevant implementation files and functions, giving guidance without a fix, a structured format, validation with representative examples, and the user-facing command with a clear state when nothing can be analyzed.
 
 ---
 ## Design Tradeoff Explainer
