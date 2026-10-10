@@ -165,6 +165,16 @@ describe("tool.registry", () => {
     }),
   )
 
+  it.instance("exposes test_failure as a built-in tool", () =>
+    Effect.gen(function* () {
+      const registry = yield* ToolRegistry.Service
+      const explainer = (yield* registry.all()).find((tool) => tool.id === "test_failure")
+
+      expect(explainer).toBeDefined()
+      expect(explainer?.description).toContain("Explain why tests failed")
+    }),
+  )
+
   withCodeMode.instance("exposes execute when code mode is enabled", () =>
     Effect.gen(function* () {
       const registry = yield* ToolRegistry.Service

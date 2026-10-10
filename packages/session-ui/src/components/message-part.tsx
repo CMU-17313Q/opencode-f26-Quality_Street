@@ -503,6 +503,11 @@ export function getToolInfo(
         title: i18n.t("ui.tool.changeImpact"),
         subtitle: input.filePath,
       }
+    case "test_failure":
+      return {
+        icon: "checklist",
+        title: i18n.t("ui.tool.testFailure"),
+      }
     case "webfetch":
       return {
         icon: "window-cursor",
@@ -1886,6 +1891,34 @@ ToolRegistry.register({
         trigger={{
           title: i18n.t("ui.tool.changeImpact"),
           subtitle: props.input.filePath,
+        }}
+      >
+        <Show when={props.output}>
+          <div
+            data-component="tool-output"
+            data-scrollable
+            tabIndex={0}
+            role="region"
+            aria-label={i18n.t("ui.scrollView.ariaLabel")}
+          >
+            <Markdown text={props.output!} />
+          </div>
+        </Show>
+      </BasicTool>
+    )
+  },
+})
+
+ToolRegistry.register({
+  name: "test_failure",
+  render(props) {
+    const i18n = useI18n()
+    return (
+      <BasicTool
+        {...props}
+        icon="checklist"
+        trigger={{
+          title: i18n.t("ui.tool.testFailure"),
         }}
       >
         <Show when={props.output}>

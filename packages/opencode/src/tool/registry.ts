@@ -11,6 +11,7 @@ import { RepositoryOverviewTool } from "./repository-overview"
 import { ComponentRelationshipTool } from "./component-relationship"
 import { LearningReviewTool } from "./learning-review"
 import { ChangeImpactTool } from "./change-impact"
+import { TestFailureTool } from "./test-failure"
 import { PrChangeSummaryTool } from "./pr-change-summary"
 import { PrImpactTool } from "./pr-impact"
 import { GrepTool } from "./grep"
@@ -115,6 +116,7 @@ const layer = Layer.effect(
     const componentRelationship = yield* ComponentRelationshipTool
     const learningReview = yield* LearningReviewTool
     const changeImpact = yield* ChangeImpactTool
+    const testFailure = yield* TestFailureTool
     const prChangeSummary = yield* PrChangeSummaryTool
     const prImpact = yield* PrImpactTool
     const writetool = yield* WriteTool
@@ -223,6 +225,7 @@ const layer = Layer.effect(
           componentRelationship: Tool.init(componentRelationship),
           learningReview: Tool.init(learningReview),
           changeImpact: Tool.init(changeImpact),
+          testFailure: Tool.init(testFailure),
           prChangeSummary: Tool.init(prChangeSummary),
           prImpact: Tool.init(prImpact),
           grep: Tool.init(greptool),
@@ -252,6 +255,7 @@ const layer = Layer.effect(
             tool.componentRelationship,
             tool.learningReview,
             tool.changeImpact,
+            tool.testFailure,
             tool.prChangeSummary,
             tool.prImpact,
             tool.grep,
