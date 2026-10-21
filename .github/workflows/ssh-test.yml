@@ -1,6 +1,8 @@
 name: Test VM SSH Connection
 
 on:
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
