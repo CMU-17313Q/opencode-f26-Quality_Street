@@ -1,0 +1,22 @@
+name: Test VM SSH Connection
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-ssh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Test SSH Connection
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_ADMIN }}
+          password: ${{ secrets.ADMIN_PASSWORD }}
+          command_timeout: 30s
+          script: |
+            whoami
+            hostname
+            echo "SSH connection successful"
