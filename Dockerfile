@@ -3,4 +3,5 @@ RUN apt-get update && apt-get install -y python3 make g++ git && rm -rf /var/lib
 WORKDIR /workspaces/opencode
 COPY . .
 RUN bun install
-CMD ["bun", "run", "packages/opencode/src/index.ts", "web", "--hostname", "0.0.0.0", "--port", "4096"]
+RUN bun run --cwd packages/opencode build --single
+CMD ["./packages/opencode/dist/opencode-linux-x64/bin/opencode", "web", "--hostname", "0.0.0.0", "--port", "4096"]
