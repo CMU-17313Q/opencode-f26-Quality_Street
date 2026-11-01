@@ -21,3 +21,7 @@ f671a5be665682c460af02a7f1a79ff36a37926d:packages/opencode/src/plugin/digitaloce
 
 # TypeScript type name (UiI18nPluralKey), not a key.
 f671a5be665682c460af02a7f1a79ff36a37926d:packages/session-ui/src/components/tool-count-summary.tsx:generic-api-key:6
+
+# This writeup quoted a keyboard shortcut value in its first commit (same
+# false positive as layout.tsx above). The line was changed in a later commit.
+fbd89998013e3c44b71a46aecc5679c962763650:docs/p3b/gitleaks.md:generic-api-key:84

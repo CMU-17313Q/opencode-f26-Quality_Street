@@ -45,7 +45,8 @@ Workflow: `.github/workflows/gitleaks.yml`
   - `packages/console/app/src/i18n/*.ts`: translated UI text. Long translated sentences look
     like random keys to the `generic-api-key` rule.
   - `packages/sdk/js/src/v2/gen/`: code generated from the OpenAPI spec.
-- `.gitleaksignore` lists the remaining 7 false alarms by fingerprint, each with a reason.
+- `.gitleaksignore` lists the remaining false alarms by fingerprint, each with a reason: 7 from
+  the original OpenCode code and 1 from the first commit of this writeup (see below).
 
 ## Execution evidence
 
@@ -70,7 +71,12 @@ Gitleaks found 3 leaks (`aws-access-token`, `github-pat`, `generic-api-key`) and
 The secrets were shown as `REDACTED` in the output. After a second commit deleted the file, the
 scan of the branch still reported the same 3 leaks, because the secret is still in history.
 
-The green `gitleaks` job on this pull request is the CI evidence.
+The check also failed on the first push of this pull request. This doc quoted one of the
+keyboard shortcut values in the findings table, and the `generic-api-key` rule flagged it. This
+is the same false positive as in `layout.tsx`, so the fix was to stop quoting the value and add
+the old commit's finding to `.gitleaksignore`. The
+failed run shows that the check blocks a PR in CI. The green `gitleaks` job after the fix is the
+passing CI evidence.
 
 ## Findings analysis
 
@@ -81,7 +87,7 @@ None came from our team's commits. None of them were real secrets.
 |---|---|---|---|
 | Translated UI text | 13 | `i18n/en.ts` | False positive |
 | Test fixtures | 4 | `http-recorder/test/record-replay.test.ts` | Irrelevant (fake keys on purpose) |
-| Keyboard shortcuts | 2 | `keybind: "shift+alt+arrowup"` | False positive |
+| Keyboard shortcuts | 2 | `keybind` values in `layout.tsx` | False positive |
 | Test IDs, type name, generated code | 3 | `prt_key_01_read`, `UiI18nPluralKey` | False positive |
 | Docs placeholder | 1 | `Bearer YOUR_API_KEY` | False positive |
 | Stripe publishable test key | 1 | `pk_test_...` in `package.json` | True match, but not a secret |
