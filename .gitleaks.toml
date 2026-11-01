@@ -1,0 +1,20 @@
+# Gitleaks configuration for Quality Street.
+# Starts from the default Gitleaks rules and only skips files that are known to
+# contain fake or non-secret values. Individual false alarms are listed in
+# .gitleaksignore with a reason.
+
+title = "Quality Street Gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Files that only contain test data, translations, or generated code"
+paths = [
+  # Test fixtures with fake keys used to check that recordings redact secrets.
+  '''^packages/http-recorder/test/''',
+  # Translated UI text. Long translated sentences look like random keys.
+  '''^packages/console/app/src/i18n/[a-z]{2}\.ts$''',
+  # Code generated from the OpenAPI spec. It has no real values.
+  '''^packages/sdk/js/src/v2/gen/''',
+]
