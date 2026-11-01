@@ -1,0 +1,27 @@
+# Known Gitleaks false alarms. Each entry is a finding fingerprint
+# (commit:file:rule:line) and a short reason. All of these come from the
+# original OpenCode import commit, not from team changes.
+
+# Test IDs for message parts ("prt_key_01_read"), not a key.
+f671a5be665682c460af02a7f1a79ff36a37926d:packages/app/e2e/performance/timeline-stability/context-matrix.spec.ts:generic-api-key:136
+
+# Keyboard shortcuts ("shift+alt+arrowup"), not keys.
+f671a5be665682c460af02a7f1a79ff36a37926d:packages/app/src/pages/layout.tsx:generic-api-key:965
+f671a5be665682c460af02a7f1a79ff36a37926d:packages/app/src/pages/layout.tsx:generic-api-key:972
+
+# Stripe publishable key in test mode (pk_test_). Publishable keys are meant
+# to be public and are shipped to the browser.
+f671a5be665682c460af02a7f1a79ff36a37926d:packages/console/app/package.json:generic-api-key:9
+
+# Placeholder token in documentation example.
+f671a5be665682c460af02a7f1a79ff36a37926d:packages/docs/ai-tools/cursor.mdx:curl-auth-header:127
+
+# Public OAuth client ID for a desktop OAuth flow. Client IDs are not secret.
+f671a5be665682c460af02a7f1a79ff36a37926d:packages/opencode/src/plugin/digitalocean.ts:generic-api-key:8
+
+# TypeScript type name (UiI18nPluralKey), not a key.
+f671a5be665682c460af02a7f1a79ff36a37926d:packages/session-ui/src/components/tool-count-summary.tsx:generic-api-key:6
+
+# This writeup quoted a keyboard shortcut value in its first commit (same
+# false positive as layout.tsx above). The line was changed in a later commit.
+fbd89998013e3c44b71a46aecc5679c962763650:docs/p3b/gitleaks.md:generic-api-key:84
