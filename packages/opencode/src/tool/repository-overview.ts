@@ -14,6 +14,7 @@ const EXCLUDED_DIRECTORIES = new Set([
   ".cache",
   ".idea",
   ".vscode",
+  ".venv",
   "node_modules",
   "bower_components",
   "coverage",
