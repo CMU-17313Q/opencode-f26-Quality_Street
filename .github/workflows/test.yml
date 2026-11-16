@@ -57,6 +57,13 @@ jobs:
             turbo-${{ runner.os }}-${{ hashFiles('turbo.json', '**/package.json') }}-
             turbo-${{ runner.os }}-
 
+      # The package `test` script runs with --only-failures, so passing tests never show up in the log.
+      # This step runs the Test Failure Explainer property tests verbosely so the log shows each property.
+      - name: Run property-based tests (verbose)
+        timeout-minutes: 5
+        working-directory: packages/opencode
+        run: GITHUB_ACTIONS=false bun test --timeout 30000 test/tool/test-failure.property.test.ts
+
       - name: Run unit tests
         timeout-minutes: 15
         # Default turbo concurrency (10) oversubscribes ubuntu-latest's 4

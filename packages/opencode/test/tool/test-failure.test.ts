@@ -273,4 +273,48 @@ describe("test failure explainer", () => {
       expect(result.metadata.failures).toBe(1)
     }),
   )
+
+  it.instance("names the function the failing assertion calls", () =>
+    Effect.gen(function* () {
+      const instance = yield* TestInstance
+      yield* Effect.promise(() =>
+        Promise.all([
+          Bun.write(
+            path.join(instance.directory, "src/math.ts"),
+            "export const add = (a: number, b: number) => a + b + 1\n",
+          ),
+          Bun.write(
+            path.join(instance.directory, "test/math.test.ts"),
+            [
+              'import { add } from "../src/math"',
+              "",
+              'test("adds", () => {',
+              "  // 2 + 2",
+              "  expect(add(2, 2)).toBe(4)",
+              "})",
+              "",
+            ].join("\n"),
+          ),
+        ]),
+      )
+      const info = yield* TestFailureTool
+      const tool = yield* info.init()
+      const result = yield* tool.execute(
+        { output: BUN_OUTPUT.replaceAll("/repo", instance.directory) },
+        {
+          sessionID: SessionID.make("ses_test"),
+          messageID: MessageID.make("msg_test"),
+          callID: "",
+          agent: "build",
+          abort: AbortSignal.any([]),
+          messages: [],
+          metadata: () => Effect.void,
+          ask: () => Effect.void,
+        },
+      )
+
+      expect(result.output).toContain("- `src/math.ts` — imported by the test, so it is likely the code under test")
+      expect(result.output).toContain("- `add` — the function the test calls at `test/math.test.ts:5`")
+    }),
+  )
 })

@@ -101,7 +101,7 @@ const HINTS: Record<FailureKind, string[]> = {
     "Should the code handle this case, or should the test expect the error?",
   ],
   unknown: [
-    "Read the first error message in the output and follow the stack trace to the first file from your own project.",
+    "What is the first error message in the output, and which is the first file from your own project in its stack trace?",
   ],
 }
 
@@ -114,15 +114,15 @@ export const TestFailureTool = Tool.define(
   Effect.gen(function* () {
     const fs = yield* FSUtil.Service
 
-    const readImports = Effect.fn("TestFailureTool.readImports")(function* (root: string, file: string) {
+    const readTestFile = Effect.fn("TestFailureTool.readTestFile")(function* (root: string, file: string) {
       const content = yield* fs.readFileStringSafe(path.join(root, file))
-      if (content === undefined) return [file, []] as const
+      if (content === undefined) return { file, content, imports: [] as string[] }
       const found = yield* Effect.forEach(importCandidates(file, content), (options) =>
         Effect.forEach(options, (option) => fs.isFile(path.join(root, option))).pipe(
           Effect.map((exists) => options[exists.indexOf(true)]),
         ),
       )
-      return [file, [...new Set(found.filter((item) => item !== undefined))]] as const
+      return { file, content, imports: [...new Set(found.filter((item) => item !== undefined))] }
     })
 
     return {
@@ -139,13 +139,15 @@ export const TestFailureTool = Tool.define(
           if (testFiles.length > 0) {
             yield* ctx.ask({ permission: "read", patterns: testFiles, always: ["*"], metadata: {} })
           }
-          const imports = Object.fromEntries(
-            yield* Effect.forEach(testFiles, (file) => readImports(instance.directory, file)),
+          const read = yield* Effect.forEach(testFiles, (file) => readTestFile(instance.directory, file))
+          const imports = Object.fromEntries(read.map((item) => [item.file, item.imports]))
+          const sources = Object.fromEntries(
+            read.flatMap((item) => (item.content === undefined ? [] : [[item.file, item.content]])),
           )
 
           return {
             title: failures.length === 0 ? "No failures found" : plural(failures.length, "failing test"),
-            output: formatTestFailureReport(failures, imports),
+            output: formatTestFailureReport(failures, imports, calledFunctions(failures, sources)),
             metadata: { failures: failures.length },
           }
         }).pipe(Effect.orDie),
@@ -161,7 +163,36 @@ export function parseTestFailures(output: string, root?: string): TestFailure[] 
   return (blocks ?? []).map((block) => toFailure(block, root))
 }
 
-export function formatTestFailureReport(failures: TestFailure[], imports: Record<string, readonly string[]> = {}) {
+/**
+ * The function an assertion calls, read from the failing line of the test file: `expect(letterGrade(80))`
+ * and `assert letter_grade(80) == "B"` both give the function name. Method calls give the method name
+ * (`grades.letterGrade(80)` gives `letterGrade`). Returns undefined when the line has no such call.
+ */
+export function calledFunction(source: string, line: number) {
+  const text = source.split(/\r?\n/)[line - 1]
+  if (text === undefined) return undefined
+  const js = text.match(/\bexpect\(\s*(?:await\s+)?(?:[A-Za-z_$][\w$]*\s*\.\s*)*([A-Za-z_$][\w$]*)\s*\(/)
+  const python = text.match(/^\s*assert\s+(?:not\s+)?(?:[A-Za-z_]\w*\.)*([A-Za-z_]\w*)\s*\(/)
+  return js?.[1] ?? python?.[1]
+}
+
+/** The function each assertion failure calls, keyed by `file:line` of the failing test line. */
+export function calledFunctions(failures: TestFailure[], sources: Record<string, string>) {
+  return Object.fromEntries(
+    failures.flatMap((failure) => {
+      if (failure.kind !== "assertion" || !failure.file || !failure.line) return []
+      const source = sources[failure.file]
+      const name = source === undefined ? undefined : calledFunction(source, failure.line)
+      return name ? [[`${failure.file}:${failure.line}`, name] as const] : []
+    }),
+  )
+}
+
+export function formatTestFailureReport(
+  failures: TestFailure[],
+  imports: Record<string, readonly string[]> = {},
+  called: Record<string, string> = {},
+) {
   if (failures.length === 0) {
     return [
       "# Test failure explanation",
@@ -175,7 +206,9 @@ export function formatTestFailureReport(failures: TestFailure[], imports: Record
     "# Test failure explanation",
     "",
     `Found ${plural(failures.length, "failing test")}.`,
-    ...failures.flatMap((failure, index) => formatFailure(failure, index, imports[failure.file ?? ""] ?? [])),
+    ...failures.flatMap((failure, index) =>
+      formatFailure(failure, index, imports[failure.file ?? ""] ?? [], called[`${failure.file}:${failure.line}`]),
+    ),
     "",
     "## Scope",
     "- This explanation is based on the test output and the files the tests import. It points to where to look but does not change any code.",
@@ -200,8 +233,8 @@ export function importCandidates(testFile: string, content: string) {
   return [...js, ...python].map((options) => options.filter((file) => !isTestFile(file)))
 }
 
-function formatFailure(failure: TestFailure, index: number, imports: readonly string[]) {
-  const locations = whereToLook(failure, imports)
+function formatFailure(failure: TestFailure, index: number, imports: readonly string[], called?: string) {
+  const locations = whereToLook(failure, imports, called)
   return [
     "",
     `## ${index + 1}. ${failure.name}`,
@@ -224,7 +257,7 @@ function formatFailure(failure: TestFailure, index: number, imports: readonly st
   ]
 }
 
-function whereToLook(failure: TestFailure, imports: readonly string[]) {
+function whereToLook(failure: TestFailure, imports: readonly string[], called?: string) {
   const own = failure.frames.filter((frame) => !isTestFile(frame.file))
   const frames = own
     .filter(
@@ -241,6 +274,10 @@ function whereToLook(failure: TestFailure, imports: readonly string[]) {
     ...imports
       .filter((file) => !frames.some((frame) => frame.file === file))
       .map((file) => `- \`${file}\` — imported by the test, so it is likely the code under test`),
+    // For an assertion, the function the failing line calls is what the student should read first.
+    ...(called && failure.kind === "assertion" && !frames.some((frame) => frame.fn === called)
+      ? [`- \`${called}\` — the function the test calls at \`${failure.file}:${failure.line}\``]
+      : []),
   ]
 }
 
