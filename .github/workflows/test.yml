@@ -59,10 +59,11 @@ jobs:
 
       - name: Run unit tests
         timeout-minutes: 15
-        # Default turbo concurrency (10) oversubscribes ubuntu-latest's 4
-        # vCPUs across 5 packages' test tasks running at once — same
-        # contention issue typecheck.yml already caps for tsgo.
-        run: GITHUB_ACTIONS=false bun turbo test --concurrency=4
+        # Each Bun test task already uses the runner's cores internally. Running
+        # four Turbo tasks at once oversubscribes the 4-vCPU runner and delays
+        # time-sensitive interruption tests. Two tasks leave enough CPU for each
+        # test runner to make progress without skipping any tests.
+        run: GITHUB_ACTIONS=false bun turbo test --concurrency=2
 
       - name: Check generated client
         timeout-minutes: 5
