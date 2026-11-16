@@ -68,6 +68,7 @@ interface ProcessorContext extends Input {
   toolcalls: Record<string, ToolCall>
   shouldBreak: boolean
   snapshot: string | undefined
+  hasToolCalls: boolean
   blocked: boolean
   needsCompaction: boolean
   currentText: SessionV1.TextPart | undefined
@@ -107,6 +108,7 @@ const layer = Layer.effect(
         toolcalls: {},
         shouldBreak: false,
         snapshot: initialSnapshot,
+        hasToolCalls: false,
         blocked: false,
         needsCompaction: false,
         currentText: undefined,
@@ -218,6 +220,7 @@ const layer = Layer.effect(
         name: string
         providerExecuted?: boolean
       }) {
+        ctx.hasToolCalls = true
         const existing = yield* readToolCall(input.id)
         if (existing) {
           if (!input.providerExecuted || existing.part.metadata?.providerExecuted) return existing
@@ -537,7 +540,9 @@ const layer = Layer.effect(
       })
 
       const cleanup = Effect.fn("SessionProcessor.cleanup")(function* () {
-        if (ctx.snapshot) {
+        // A text-only response cannot have changed the worktree. Avoid spawning
+        // Git during interruption cleanup unless the stream actually used a tool.
+        if (ctx.snapshot && ctx.hasToolCalls) {
           const patch = yield* snapshot.patch(ctx.snapshot)
           if (patch.files.length) {
             yield* session.updatePart({
