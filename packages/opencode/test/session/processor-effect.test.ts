@@ -849,7 +849,9 @@ it.live("session.processor effect tests mark pending tools as aborted on cleanup
             messages: [{ role: "user", content: "tool abort" }],
             tools: {},
           })
-          .pipe(Effect.forkChild)
+          // The next step waits for the request this fiber initiates. Start it
+          // before yielding so the readiness barrier cannot starve it under CI load.
+          .pipe(Effect.forkChild({ startImmediately: true }))
 
         yield* llm.wait(1)
         yield* waitFor(
