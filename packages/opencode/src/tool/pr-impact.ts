@@ -54,6 +54,11 @@ export function aggregateImpacts(changedFiles: string[], impacts: ChangeImpact[]
 }
 
 function rank(areas: ImpactedArea[]) {
+  // Sort each area's lists so the report doesn't depend on the order of the changed files (R7).
+  for (const area of areas) {
+    area.causedBy.sort()
+    area.reasons.sort()
+  }
   return areas.sort(
     (left, right) => right.causedBy.length - left.causedBy.length || left.path.localeCompare(right.path),
   )
