@@ -107,7 +107,6 @@ export const make = <A, E = never>(
 
   const stopShell = (shell: ShellHandle<A, E>) =>
     Effect.gen(function* () {
-      if (shell.ready) yield* shell.ready.await.pipe(Effect.exit, Effect.asVoid)
       yield* Deferred.succeed(shell.cancelled, undefined).pipe(Effect.asVoid)
       yield* Fiber.interrupt(shell.fiber)
     })
@@ -148,7 +147,8 @@ export const make = <A, E = never>(
         yield* onBusy
         const id = next()
         const cancelled = yield* Deferred.make<void>()
-        const fiber = yield* work.pipe(Effect.ensuring(finishShell(id)), Effect.forkChild)
+        // Start the supervised shell before exposing its busy state to concurrent callers.
+        const fiber = yield* work.pipe(Effect.ensuring(finishShell(id)), Effect.forkChild({ startImmediately: true }))
         const shell = { id, cancelled, ready, fiber } satisfies ShellHandle<A, E>
         return [
           Effect.gen(function* () {

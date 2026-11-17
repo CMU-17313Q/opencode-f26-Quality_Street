@@ -332,6 +332,26 @@ describe("Runner", () => {
   )
 
   it.live(
+    "cancel interrupts a shell that has not signaled ready",
+    Effect.gen(function* () {
+      const s = yield* Scope.Scope
+      const runner = Runner.make<string>(s)
+      const ready = yield* Latch.make()
+
+      const sh = yield* runner
+        .startShell(Effect.never.pipe(Effect.as("ignored")), ready)
+        .pipe(Effect.forkChild)
+      yield* waitForState(runner, "Shell")
+
+      yield* runner.cancel.pipe(Effect.timeout("250 millis"))
+      expect(runner.busy).toBe(false)
+
+      const exit = yield* Fiber.await(sh).pipe(Effect.timeout("250 millis"))
+      expect(Exit.isFailure(exit)).toBe(true)
+    }),
+  )
+
+  it.live(
     "cancel does not mask shell defects",
     Effect.gen(function* () {
       const s = yield* Scope.Scope
